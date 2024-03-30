@@ -7,10 +7,10 @@ def home_menu():
         "[SPACE] Generate a new graph",
         "[1] Ant Colony Optimization Algorithm",
         "[2] A* Algorithm",
-        "[3] Held-Karp Algorithm Algorithm",
+        "[3] Held-Karp Algorithm",
         "",
         "",
-        "Press Space to start . . ."
+        "           Press Space to start . . ."
     ]
 
     screen.fill(GREEN)

@@ -1,66 +1,77 @@
-import itertools
-
-def euclidean_distance(point1, point2):
-    x1, y1 = point1
-    x2, y2 = point2
-    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
-
-def held_karp_tsp(coordinates):
-    num_nodes = len(coordinates)
-    all_nodes = set(range(num_nodes))
-
-    # Initialize memoization table and path reconstruction table
-    memo = {}
-    path_table = {}
-
-    # Helper function for recursive calls
-    def tsp_helper(current, remaining):
-        if not remaining:
-            return euclidean_distance(coordinates[current], coordinates[0])
-
-        # Check if solution for this subproblem is already computed
-        if (current, tuple(remaining)) in memo:
-            return memo[(current, tuple(remaining))]
-
-        min_distance = float('inf')
-        next_node_choice = None
-
-        for next_node in remaining:
-            new_remaining = tuple(node for node in remaining if node != next_node)
-            distance = euclidean_distance(coordinates[current], coordinates[next_node]) + tsp_helper(next_node, new_remaining)
-
-            if distance < min_distance:
-                min_distance = distance
-                next_node_choice = next_node
-
-        # Memoize the solution and update path table
-        memo[(current, tuple(remaining))] = min_distance
-        path_table[(current, tuple(remaining))] = next_node_choice
-
-        return min_distance
-
-    # Start the recursion from the first node
-    optimal_distance = tsp_helper(0, all_nodes - {0})
-
-    # Reconstruct the best path
-    path = [0]
-    current = 0
-    remaining = all_nodes - {0}
-
-    while remaining:
-        next_node = path_table[(current, tuple(remaining))]
-        path.append(next_node)
-        current = next_node
-        remaining.remove(next_node)
-
-    return path, optimal_distance
-
-# Coordinates of the nodes
-nodes_coordinates = [(99, 72), (16, 582), (75, 384), (115, 96), (462, 176), (464, 347), (405, 208), (524, 20), (86, 270), (539, 159)]
+import random
+import numpy as np
+from config import pop_size, gens, mut_rate
 
 
-# Solve TSP using Held-Karp algorithm
-best_path, best_distance = held_karp_tsp(nodes_coordinates)
+def calculate_distance(node1, node2):
+    return np.sqrt((node1[0] - node2[0]) ** 2 + (node1[1] - node2[1]) ** 2)
 
-print("Best Path (Held-Karp):", best_path)
-print("Best Distance (Held-Karp):", best_distance)
+
+def calculate_total_distance(path, nodes):
+    total_distance = sum(calculate_distance(nodes[path[i]], nodes[path[i + 1]]) for i in range(len(path) - 1))
+    total_distance += calculate_distance(nodes[path[-1]], nodes[path[0]])  # Return to the starting point
+    return total_distance
+
+
+def create_distance_matrix(nodes):
+    num_nodes = len(nodes)
+    distance_matrix = np.zeros((num_nodes, num_nodes))
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            distance_matrix[i][j] = calculate_distance(nodes[i], nodes[j])
+            distance_matrix[j][i] = distance_matrix[i][j]
+    return distance_matrix
+
+
+def initialize_population(size, num_nodes):
+    return [random.sample(range(num_nodes), num_nodes) for _ in range(size)]
+
+
+def select_parents(population, distances, nodes):
+    distances_values = [calculate_total_distance(path, nodes) for path in population]
+    selected_indices = np.argsort(distances_values)[:2]
+    return [population[i] for i in selected_indices]
+
+
+def crossover(parent1, parent2):
+    crossover_point = random.randint(0, len(parent1) - 1)
+    child = parent1[:crossover_point] + [node for node in parent2 if node not in parent1[:crossover_point]]
+    return child
+
+
+def mutate(child, mutation_rate):
+    if random.random() < mutation_rate:
+        indices = random.sample(range(len(child)), 2)
+        child[indices[0]], child[indices[1]] = child[indices[1]], child[indices[0]]
+    return child
+
+
+def genetic_algorithm(nodes, population_size=pop_size, generations=gens, mutation_rate=mut_rate):
+    num_nodes = len(nodes)
+    distance_matrix = create_distance_matrix(nodes)
+    population = initialize_population(population_size, num_nodes)
+    iteration_counter = 0
+
+    for generation in range(generations):
+        iteration_counter += 1  # Increment the iteration counter
+        parents = select_parents(population, distance_matrix, nodes)
+        offspring = [crossover(parents[0], parents[1]) for _ in range(population_size - 2)]
+        offspring = [mutate(child, mutation_rate) for child in offspring]
+        population = parents + offspring
+
+        best_path = min(population, key=lambda path: calculate_total_distance(path, nodes))
+        best_distance = calculate_total_distance(best_path, nodes)
+
+        print(f"Generation {generation + 1}: Best Path = {best_path}, Best Distance = {best_distance}")
+
+    best_path = min(population, key=lambda path: calculate_total_distance(path, nodes))
+    best_distance = calculate_total_distance(best_path, nodes)
+
+    return best_path, best_distance, iteration_counter
+
+
+nodes = [(0, 0), (1, 2), (3, 1), (5, 3), (4, 6), (0, 0), (1, 2), (3, 1), (5, 3), (4, 6)]
+best_path, best_distance, iterations = genetic_algorithm(nodes)
+print("Best Path:", best_path)
+print("Best Distance:", best_distance)
+print("Iterations:", iterations)

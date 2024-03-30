@@ -17,10 +17,12 @@ BLACK = (0, 0, 0)
 GREEN = (66, 245, 161)
 GRAY = (149, 163, 186)
 
-# Algorithm variables
+# Number of cities
 num_nodes = 10
+
+# ACO variables
 gens = 1000
-mut_rate = 0.1
+mut_rate = 0.01
 pop_size = 50
 
 # Pygame window

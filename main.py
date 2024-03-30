@@ -4,16 +4,18 @@ graph = Graphs()
 if __name__ == "__main__":
     pygame.init()
     home_menu()
-    show_lines = True
     while True:
         for event in pygame.event.get():
-            nodes = graph.generate_random_coordinates(num_nodes)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    graph.draw_graph(screen, nodes, show_lines)
+                if event.key == pygame.K_d:
+                    nodes = graph.generate_random_coordinates(num_nodes)
+                    city_numbers = graph.generate_random_cities(nodes)
+                    tree_numbers, tree_coords = graph.generate_random_trees()
+                    graph.draw_current_cities(screen, nodes, city_numbers, True)
+                    graph.draw_current_trees(tree_numbers, tree_coords)
                 if event.key == pygame.K_1:
                     graph.draw_shortest_path(1)
                 if event.key == pygame.K_2:

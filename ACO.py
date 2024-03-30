@@ -1,4 +1,6 @@
-from config import *
+import random
+import numpy as np
+from config import pop_size, gens, mut_rate
 
 
 def calculate_distance(node1, node2):
@@ -43,24 +45,3 @@ def mutate(child, mutation_rate):
         child[indices[0]], child[indices[1]] = child[indices[1]], child[indices[0]]
     return child
 
-
-def genetic_algorithm(nodes, population_size=pop_size, generations=gens, mutation_rate=mut_rate):
-    num_nodes = len(nodes)
-    distance_matrix = create_distance_matrix(nodes)
-    population = initialize_population(population_size, num_nodes)
-
-    for generation in range(generations):
-        parents = select_parents(population, distance_matrix, nodes)
-        offspring = [crossover(parents[0], parents[1]) for _ in range(population_size - 2)]
-        offspring = [mutate(child, mutation_rate) for child in offspring]
-        population = parents + offspring
-
-        best_path = min(population, key=lambda path: calculate_total_distance(path, nodes))
-        best_distance = calculate_total_distance(best_path, nodes)
-
-        # print(f"Generation {generation + 1}: Best Path = {best_path}, Best Distance = {best_distance}")
-
-    best_path = min(population, key=lambda path: calculate_total_distance(path, nodes))
-    best_distance = calculate_total_distance(best_path, nodes)
-
-    return best_path, best_distance

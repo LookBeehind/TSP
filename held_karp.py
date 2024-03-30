@@ -1,9 +1,11 @@
 from config import *
 
+
 def euclidean_distance(point1, point2):
     x1, y1 = point1
     x2, y2 = point2
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+
 
 def held_karp(coordinates):
     num_nodes = len(coordinates)
@@ -12,9 +14,11 @@ def held_karp(coordinates):
     # Initialize memoization table and path reconstruction table
     memo = {}
     path_table = {}
+    num_iterations = [0]  # A list to hold the number of iterations
 
     # Helper function for recursive calls
     def tsp_helper(current, remaining):
+        num_iterations[0] += 1  # Increment the iteration count
         if not remaining:
             return euclidean_distance(coordinates[current], coordinates[0])
 
@@ -53,4 +57,4 @@ def held_karp(coordinates):
         current = next_node
         remaining.remove(next_node)
 
-    return path, optimal_distance
+    return path, optimal_distance, num_iterations[0]  # Return the number of iterations
