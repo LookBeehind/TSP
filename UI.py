@@ -4,13 +4,12 @@ from graphs import *
 def home_menu():
     font = pygame.font.Font(None, 36)
     menu_text = [
-        "[SPACE] Generate a new graph",
+        "[M] Open Menu",
+        "[D] Generate a dense graph",
+        "[S] Generate a sparse graph",
         "[1] Ant Colony Optimization Algorithm",
         "[2] A* Algorithm",
         "[3] Held-Karp Algorithm",
-        "",
-        "",
-        "           Press Space to start . . ."
     ]
 
     screen.fill(GREEN)

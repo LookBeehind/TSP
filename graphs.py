@@ -50,12 +50,15 @@ class Graphs(Coordinates):
         self.current_city_images = []
         self.current_tree_images = []
         self.best_path = []
+        self.lines_data = []
         self.road_width = 0
         self.best_distance = 0
         self.iters = 0
 
-    def draw_current_cities(self, new_screen, nodes, city_numbers, show_lines=True, final=False):
+    def draw_current_cities(self, new_screen, nodes, city_numbers, graph_type='dense', connectivity=0.3, final=False, show_lines=True):
         new_screen.fill(GREEN)
+        lines_data = []  # Initialize an empty list to store line data
+
         if final:
             self.draw_roads()
 
@@ -75,9 +78,26 @@ class Graphs(Coordinates):
 
             # Blit the city image onto the screen at the center of the node position
             screen.blit(city_image, city_rect)
-            for j in range(i + 1, len(nodes)):
-                if show_lines:
-                    pygame.draw.line(new_screen, BLACK, nodes[i], nodes[j], 1)
+
+            # Draw lines based on graph type
+            if graph_type == 'dense':
+                for j in range(i + 1, len(nodes)):
+                    if show_lines:
+                        # Draw dense lines
+                        line_data = (nodes[i], nodes[j])  # Store the coordinates of the line's endpoints
+                        lines_data.append(line_data)  # Append the line data to the list
+                        pygame.draw.line(new_screen, BLACK, line_data[0], line_data[1], 1)
+            elif graph_type == 'sparse':
+                num_connections = int(connectivity * len(nodes))
+                connections = random.sample(range(len(nodes)), num_connections)
+                for j in connections:
+                    if show_lines:
+                        # Draw sparse lines
+                        line_data = (nodes[i], nodes[j])  # Store the coordinates of the line's endpoints
+                        lines_data.append(line_data)  # Append the line data to the list
+                        pygame.draw.line(new_screen, BLACK, line_data[0], line_data[1], 1)
+
+        self.lines_data = lines_data
 
     def draw_current_trees(self, tree_numbers, tree_coords, show_trees=True):
         for i, tree_coord in enumerate(tree_coords):
@@ -151,7 +171,7 @@ class Graphs(Coordinates):
     def draw_final_interface(self):
         screen.fill(GREEN)
 
-        self.draw_current_cities(screen, self.current_nodes, self.current_city_numbers, False, True)
+        self.draw_current_cities(screen, self.current_nodes, self.current_city_numbers, final=True, show_lines=False)
         self.draw_current_trees(self.current_tree_numbers, self.current_tree_coordinates)
 
         self.draw_analyze(self.best_distance, self.iters)
@@ -167,13 +187,13 @@ class Graphs(Coordinates):
 
     def genetic_algorithm(self, nodes, population_size=pop_size, generations=gens, mutation_rate=mut_rate):
         num_nodes = len(nodes)
-        distance_matrix = create_distance_matrix(nodes)
+        lines_data = self.lines_data
         population = initialize_population(population_size, num_nodes)
         iteration_counter = 0
 
         for generation in range(generations):
             iteration_counter += 1  # Increment the iteration counter
-            parents = select_parents(population, distance_matrix, nodes)
+            parents = select_parents(population, lines_data, nodes)
             offspring = [crossover(parents[0], parents[1]) for _ in range(population_size - 2)]
             offspring = [mutate(child, mutation_rate) for child in offspring]
             population = parents + offspring
@@ -181,7 +201,7 @@ class Graphs(Coordinates):
             best_path = min(population, key=lambda path: calculate_total_distance(path, nodes))
             best_distance = calculate_total_distance(best_path, nodes)
 
-            self.draw_current_cities(screen, nodes, self.current_city_numbers, False)
+            self.draw_current_cities(screen, nodes, self.current_city_numbers, final=False, show_lines=False)
             self.draw_current_trees(self.current_tree_numbers, self.current_tree_coordinates)
             self.draw_lines(best_path, nodes)
             self.draw_analyze(best_distance, iteration_counter)
