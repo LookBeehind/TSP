@@ -5,6 +5,7 @@ import math
 import numpy as np
 import itertools
 import heapq
+from queue import PriorityQueue
 
 # Constants
 WIDTH, HEIGHT = 800, 600

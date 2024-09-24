@@ -15,11 +15,13 @@ if __name__ == "__main__":
                         graph_type = 'dense'
                     else:
                         graph_type = 'sparse'
+
                     nodes = graph.generate_random_coordinates(num_nodes)
                     city_numbers = graph.generate_random_cities(nodes)
                     tree_numbers, tree_coords = graph.generate_random_trees()
                     graph.draw_current_cities(screen, nodes, city_numbers, graph_type, show_lines=True)
                     graph.draw_current_trees(tree_numbers, tree_coords)
+
                 if event.key == pygame.K_1:
                     graph.draw_shortest_path(1)
                 if event.key == pygame.K_2:

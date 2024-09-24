@@ -87,6 +87,7 @@ class Graphs(Coordinates):
                         line_data = (nodes[i], nodes[j])  # Store the coordinates of the line's endpoints
                         lines_data.append(line_data)  # Append the line data to the list
                         pygame.draw.line(new_screen, BLACK, line_data[0], line_data[1], 1)
+
             elif graph_type == 'sparse':
                 num_connections = int(connectivity * len(nodes))
                 connections = random.sample(range(len(nodes)), num_connections)
@@ -159,18 +160,20 @@ class Graphs(Coordinates):
         pygame.draw.line(screen, BLACK, nodes[path[-1]], nodes[path[0]], 2)
 
     def draw_shortest_path(self, algorithm):
+        start = self.current_nodes[0]
+        end = self.current_nodes[-1]
+        print(self.lines_data)
+        print(self.current_nodes)
         if algorithm == 1:
             self.best_path, self.best_distance, self.iters = self.genetic_algorithm(self.current_nodes)
         elif algorithm == 2:
             self.best_path, self.best_distance, self.iters = a_star(self.current_nodes)
         elif algorithm == 3:
             self.best_path, self.best_distance, self.iters = held_karp(self.current_nodes)
-
         self.draw_final_interface()
 
     def draw_final_interface(self):
         screen.fill(GREEN)
-
         self.draw_current_cities(screen, self.current_nodes, self.current_city_numbers, final=True, show_lines=False)
         self.draw_current_trees(self.current_tree_numbers, self.current_tree_coordinates)
 

@@ -40,4 +40,3 @@ def a_star(coordinates):
             heapq.heappush(priority_queue, (new_cost, next_node, new_path))
 
     return None, float('inf'), num_iterations  # No valid path found
-
